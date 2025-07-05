@@ -1,4 +1,3 @@
-
 # BTCMovil API v2 🟠
 
 Este es el backend oficial de la plataforma **BTCMovil**, con minería real desde navegador, historial, persistencia de datos y retiros automáticos o manuales (incluyendo vía Qik Banco).
