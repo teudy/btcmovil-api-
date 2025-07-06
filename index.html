@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>BTCMovil - Minado Real con CPU</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    body {
+      background: #000;
+      color: #0f0;
+      font-family: monospace;
+      text-align: center;
+      padding: 20px;
+    }
+    .panel {
+      background: #111;
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+      width: 90%;
+      max-width: 600px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+    }
+    button {
+      background: #f7931a;
+      color: #000;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .status, .actions {
+      background: #222;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>BTCMovil ⚒️ Minado Real con CPU</h1>
+  <div class="panel">
+    <input type="text" id="wallet" placeholder="Tu wallet BTC" style="width: 100%; max-width: 400px;" />
+    <br>
+    <button onclick="startMining()">🚀 Empezar Minado</button>
+    <div class="status" id="output">⛏️ Esperando inicio...</div>
+    <div class="actions">
+      <button onclick="verSaldo()">🧮 Ver Saldo</button>
+      <button onclick="retirarBTC()">💰 Retirar BTC</button>
+      <button onclick="retiroQik()">🇩🇴 Retiro Qik</button>
+      <button onclick="verHistorial()">📜 Ver Historial</button>
+    </div>
+  </div>
+
+  <script>
+    let totalHashes = 0;
+    let wallet = "";
+
+    async function startMining() {
+      wallet = document.getElementById("wallet").value.trim();
+      if (!wallet) return alert("Ingresa tu wallet BTC");
+
+      document.getElementById("output").innerText = "⛏️ Cargando xmrig-wasm (simulado)...";
+
+      // Aquí se integrará el xmrig real
+      setInterval(() => {
+        const hps = Math.floor(60 + Math.random() * 100);
+        totalHashes += hps;
+
+        document.getElementById("output").innerText = 
+          `Wallet: ${wallet}\nHashrate: ${hps} H/s\nTotal: ${totalHashes} H`;
+
+        fetch("https://btcmovil-api.onrender.com/minar-real", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ wallet: wallet, hashes: hps })
+        });
+      }, 10000);
+    }
+
+    function verSaldo() {
+      if (!wallet) return alert("Primero ingresa tu wallet");
+      fetch("https://btcmovil-api.onrender.com/saldo/" + wallet)
+        .then(res => res.json())
+        .then(data => alert("Saldo BTC: " + data.saldo));
+    }
+
+    function retirarBTC() {
+      if (!wallet) return alert("Primero ingresa tu wallet");
+      const monto = prompt("¿Cuánto BTC deseas retirar?");
+      if (monto)
+        fetch("https://btcmovil-api.onrender.com/retirar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ wallet: wallet, monto: parseFloat(monto) })
+        }).then(res => alert("Solicitud enviada"));
+    }
+
+    function retiroQik() {
+      if (!wallet) return alert("Primero ingresa tu wallet");
+      const cuenta = prompt("Ingresa tu número de cuenta Qik:");
+      const monto = prompt("Monto en pesos dominicanos:");
+      if (cuenta && monto)
+        fetch("https://btcmovil-api.onrender.com/retiro-qik", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ wallet: wallet, cuenta: cuenta, monto: parseFloat(monto) })
+        }).then(res => alert("Retiro Qik solicitado"));
+    }
+
+    function verHistorial() {
+      if (!wallet) return alert("Primero ingresa tu wallet");
+      fetch("https://btcmovil-api.onrender.com/historial/" + wallet)
+        .then(res => res.json())
+        .then(data => alert("Historial:\n" + data.historial.map(h => h.tipo + ": " + h.monto + " (" + h.fecha + ")").join("\n")));
+    }
+  </script>
+</body>
+</html>
